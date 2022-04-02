@@ -1,0 +1,118 @@
+Git nedir ?
+Açık kaynaklı bir yazılım. Dağıtık bir sistem.Yani localimize yaptığımız bir değişiklik , başka bir uzak ortama taşındığında dağılmaz.
+Nasıl çalışıyor ?
+Mesela bir odanın fotografını çektik.
+Ardından odanın içinde sadece bardağın yerini değiştirdik.Ve tekrar foto çektik.
+Burada Git bardağının değişikliğinin durumunu tutmaz.Odanın son halini tutar.Ve zamanla önceye gidebilir.SVN ise sadece o bardağın değişikliliğini tutar.SVN başka bir yapı.
+
+Peki Git storage nasıldır ? Mesela projemiz 100 MB.Ve bir değişiklik yaptık ve commit yaptık.Git son halinin artık alacak ve yeni hali kaç mb ? Yani bir commit yaptıımız için 200 mb mı olur?
+Hayır sadece değişiklikler için bir hafıza oluşturur.Mesela bir commit yazptık ve onun bir hash i oluşur ve tekrar bir commit de o hashi refere eder.Aynı içerikde olan ik dosyayı git algılar.ve bunları gruplar.sıkıştırı.
+
+
+Bir projemizi GİT  de tutmak için öncelikle projeyi Git de tanımlanabilir hale getirmemiz gerek.
+
+git init ->Bu komut ile .git adında bir dosya oluşturur.İçerisinde-> HEAD,config,description,hooks,info,object,ref klasör ve dosyalar oluşturur.Git hafızayı kullanırken bu dosyaları kullanır.
+
+Biz çalışırken Git'in kendi tarafında algılayabildiği 3 tane alan var.-> Working,Staging,Repo
+
+Working (Çalışma alnımız):Biz projemizde bir çok değişiklik yapıyoruz.Mesela yeni class lar ekliyoıruz.Dosyalar siliyoruz vs.Bu değişiklikler Git özelinde değil.Hep kendi projemizde yaptığımız işler.
+Bu değişiklikleri Git'in hafızasına eklememiz gerek.Bunun için -> git add .  (Working den Staging e geçmek için)
+
+Staging:Değişiklikleri hafızaya tanıtmıştık.Ve bu değişiklikleri aldığımız yer.Bu değişiklikleri commit leriz.Ve zaman da bir iz bırakıp , bir commit objesi oluşmuş oluyor.Dikkat edelim ki commit dedikten sonra geçmişe gidip bir şeyler görebilriz.
+Commit yapıldıktan sonra , repo alanına geçilir. -> git commit  (Staging den , Repoya geçmek için)
+
+Git bizim değişikliklerimizi nerede tutuyor ? 
+(Hatırlarsak , herhangi bir projenin veya algoritmanın başarılı olabilmesi iki ana seçenek vardır.1.Düzgün veri yapısı, 2.Karmaşıklık olarak en iyi performansı vermesi.)
+Git objelerini tutuğu bir veri yapısı vardır.
+1.Blob -> (Binary Large Objects)-> Working den , Stage e geçtiği zaman  bir BLOB objesi yaratılır.
+2.Tree -> Objeler soyağacı gibi.Ve bir ağaç modelinde.
+3.Commit -> Commit , ağacın en tepeisndeki yapı.İçinde birçok bilgi içerir.Commitin altında tree , tree nin altında blob lar var.
+
+Biz her commit yaptığımızda , bir commit id si oluşur.Bu hashcode gibidir.Bu commit id ler sayesinde bir state vs tutmaya gerek yok ve bu id ile o commitin her şeyine ulaşabiliriz.Dağıtık sistemler için çok iyi bir sistem.
+
+Git Diff ->  git diff : working ile staging arasındaki farkı alır.Mesela biz A.java dosyasını değiştirdik ve "git diff" komutunu çalıştırdık.Buradan bir farklılık dönmez.Ama bu değişikliğimizi commitlersek , diff  ile farklılıklar döner.
+git diff --staged :Staging ile repo arasındaki farkları getiririz.
+
+Git Reset-> git reset --hard HEAD --> Commitlenmemiş dosyaları tekrar Working alanına alır.Yani stage dekileri workinge alır.
+Mesela bir şeyler değiştirdik sürekli ve 5 tane commitimiz var.En son commitimiz ne ise HEAD orayı gösterir.HEAD'is istediğimiz commit seviyesine çekebiliriz.
+
+Git Rebase: History i değiştiriyoruz.git rebase -i HEAD~3 -> Şuanlık bulunduğum yerden , 3 commit öncesine kadar ki kısmı al ve editör aç .Çünkü editleme yapılcak"diyoruz.
+Bunu neden yapıyoruz.?Arka taraftaki commit kalabalığından kurtulmak vs.Mesela kirli commitleri tek bir commit de toplayabiliriz.
+
+Git merge fast forward :Meselam mastera 3 tane commit yapılmış olsu.3. commit de test branchi açıldı.Ve bu test branchinde iken 2 commit yapıldı.Biz masterda iken , test branchini merge edersek , bunu görebiliriz.
+
+Adımlar.
+44184658
+1.git-demo adında bir klasör açtık.
+2.git init -> .git folder'ını oluştur.
+3.ardından bir tane "src" adında bir klasöt.Oluşturalım.-> mkdir src
+4.src içerisine de "app.js" adında bir dosya yaratalım.-> vi app.js ("Application is running" şeklinde editleyelim.:wq ile çıkılır.)
+5.src içerisine de "button.html" adında bir dosya yaratalım.-> vi button.html ("I am a button" şeklinde editleyelim.)
+6.git status -> Untracked files :(Working area) .Hala stage göndermedik.
+7.git add . -> Stage e gönderdik. Burada .git altındaki object folderının altında iki tane blob instance ı oluşacak.Çünkü iki tane file ımız var. -> find .git/objects -type f  (Buradan oluşan objelerimizi görebiliriz.)
+8.Bu objelerin içeriğini görmek istiyorsak  (.git/objects/2d/4a890b63be555d4ff75594bb991629f626f435) > git show  2d4a şeklinde görebiliriz.	
+8.Tekrar git status -> Changes  to be committed.
+9.Yeni bir doya oluşturalım.vi button.css ->  ("I am a button" şeklinde editleyelim.) , button.html ile içerik aynı.
+10.şimdi de stage alalım.-> git add .
+11.Git burada yeni bir obje(blob) oluşturmuyor.button.html ile aynı yeri refere ediyor.Yani tek bir objeye iki pointer.
+12.git commit -m "initial project"  -> stage de olan değişliklikleri , repo ya ekleriz.
+13.Git de oluşan objeleri görelim.->find .git/objects -type f  -> Burada hem klasörler için obje oluşacak , hemde file lar için.Mesela src içinde object oluşacak.
+14.Yani, Git arkada taraf da bizim için bir ağaç oluşturuyor.Buna Hash Tree  veya Merkal tree diyoruz.
+15.git status -> nothing to commit, working tree clean -> Değişiklikleri commitledik. 
+16.Şimdi  yeni bir branch oluşturalı.-> git branch feature/payment-method   ->  "initial project" commitini pointer ediyor.
+17.Ardından vi .gitignore diyerek bir dosya oluşturalım.(Hala master branchindeyiz. !!)
+18.Ardından git add . ve  commit ("gitignore add") leyelim.Yani master branchinde bir şey commitledik.Ancak,  feature/payment-method branchi şuanda burayı pointer etmiyor.Önceki commiti pointer ediyor.Master branchindeyiz.ve Master branchi "gitignore add" pointer ediyor.   
+19.Mesela master branhinden bir commit öncesine gidelim. git checkout HEAD~1 -> 
+Output : 
+200546@T1LPRVT4487 MINGW64 ~/Desktop/Java Tutorial/Using Git Like a Hero/git-demo ((b190a3b...))   -->"İnitial project" (commit id: b190a3b...)
+
+-> Tekrar dan master branhine geçerek o değişiklikleri geri getirebiliriz. git checkout master -> Tekrar dan ".gitignore add" commitini refere eder.
+
+20.Şimdi de  feature/payment-method branhine geçelim. -> git checkout feature/payment-method -> Unutmayalım bu hala commit 1 de.
+21. Bu branhe de .gitignore dosyası ekleyelim ve içeriği "This will be conflicted" olarak editleyelim. vi .gitignore
+22.Ardından git add . ile stage e alalım.
+23.git commit -m "git ignore added"  -> Repoya gönderdik.
+24.Ardından master branhine geçelim -> git checkout master
+25.Sonra da master branchinde iken , feature/payment-method  branhini merge ededelim -> git merge feature/payment-method 
+26.Merge işlemini yaptıktan sonra conflict problemi ile karşılaşmayacağız çünkü .gitignore dosya isimleri aynı olmasına rağmen , içerik farklı.
+27.Yeni bir branch oluşturalım. -->  git checkout -b feature/customer-deletion  (Bu şekilde de oluşturabiliriz.)
+28.feature/customer-deletion branchinde iken , a.java dosyası oluşturalım.Ardından git add . ve git commit.
+29.Ardından bir dosya oluşturalım. b.cpp ve bnu da commitleyelim.
+30.Şimdi fast forward mantığı şu.Bizim master daki son commitden sonra,feature/customer-deletion branchin de değişiklikler yaptık.Master da iken git merge feature/customer-deletion dersek , masterımızı ileriye doğru hızlı (fast forward) şeklinde son hai alacak.
+Output:  
+Updating 0c2ea6e..6aaf545
+Fast-forward
+ a.java | 5 +++++
+ b.cpp  | 7 +++++++
+ 2 files changed, 12 insertions(+)
+ create mode 100644 a.java
+ create mode 100644 b.cpp
+ 
+31.Bir tane daha branch oluşturalım. -> git branch feature/ai-support-added
+32.Ardında master branhinde iken . github klasörü ve workflows klasörü oluşturarak , içerisine bir dosya açıp editleyelim.Yani değişiklik yapıyoruz. mkdir -p .github/workflows
+Ardından içerisine bir buidl yaml dosyası oluşturalım ->  vi .github/workflows/build.yml  içerisini editleyelim.
+
+33.git add . ile stage e al.-> git commit -m "initial gh action" ile repo ya al. 
+32.Ardından feature/ai-support-added branhine ge.k8s.yml dosyasnı oluştur.Ardıdnan commitle.
+14.git rebase -i HEAD~5 -> Son 5 commiiti listeleyelim.Ve commmitleri sıkıştırıp, tek bir commit yapabiliriz.
+15.Mesela a.txt dosyasını oluşturduk ve içerisini ediyledik.Ardından bi zaman sonra tekrar içerisini editledik.git diff ile farkını görwebiliriz.
+(Not:Sadece değişiklik yapılan dosyaları (working area da olan ile staging de olanı) git diff ile görüyoruz.).Eğer working areadaki stage alırsak , bir fark kalmaz.
+Ancak repo ve stage arasındaki farkı da -> git diff --staged
+
+16.Git i bir tool a bağlayabiliriz.Mesela Intelli jaya bağlayabiliriz.Bunun için vi ~/.gitconfig  içerisine bell, komutlar yazarak , intell,ja idea yı bağlayabiliriz.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
